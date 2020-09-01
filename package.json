@@ -1,0 +1,30 @@
+{
+    "name": "plumscript",
+    "version": "0.0.1",
+    "description": "PlumScript Programming Language",
+    "main": "index.js",
+    "scripts": {
+        "start": "npx nodemon dist/app.js",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/CalebLangbroek/plumscript.git"
+    },
+    "keywords": [
+        "programming",
+        "language"
+    ],
+    "author": "Caleb Langbroek",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/CalebLangbroek/plumscript/issues"
+    },
+    "homepage": "https://github.com/CalebLangbroek/plumscript#readme",
+    "dependencies": {
+        "typescript": "^4.0.2"
+    },
+    "devDependencies": {
+        "nodemon": "^2.0.4"
+    }
+}

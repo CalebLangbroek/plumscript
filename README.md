@@ -1,2 +1,2 @@
-# plumscript
+# PlumScript
 PlumScript Programming Language
