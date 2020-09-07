@@ -2,9 +2,10 @@
     "name": "plumscript",
     "version": "0.0.1",
     "description": "PlumScript Programming Language",
-    "main": "index.js",
+    "main": "app.js",
     "scripts": {
         "start": "npx nodemon dist/app.js",
+        "clean": "rm -r dist",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "repository": {
