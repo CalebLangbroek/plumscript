@@ -1,16 +1,16 @@
 import { Utils } from './utils/utils';
-import { Token } from './token';
+import { Token, TokenUtils } from './token';
 import { SyntaxError } from './errors/syntax-error';
 
 const input = `
     # A simple program
     var a = 4
 
-    var y = 5
+    var y = treu
     
     var name = "John"
 
-    print(4, "John", y) 
+    print("John") 
 `;
 
 function executeProgram(program: string): void {
@@ -36,7 +36,7 @@ function tokenize(str: string): Token {
     }
     str = str.trim();
 
-    return Token.tokenize(str);
+    return TokenUtils.tokenize(str);
 }
 
 executeProgram(input);

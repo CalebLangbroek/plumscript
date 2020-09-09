@@ -1,1 +1,1 @@
-export class SyntaxError extends Error{}
+export class SyntaxError extends Error {}
