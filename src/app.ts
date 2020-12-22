@@ -1,42 +1,19 @@
-import { Utils } from './utils/utils';
-import { Token, TokenUtils } from './token';
-import { SyntaxError } from './errors/syntax-error';
+import { Scanner } from './scanner';
 
 const input = `
     # A simple program
     var a = 4
-
-    var y = treu
-    
-    var name = "John"
-
-    print("John") 
+    var b = 5 + 3
+    print("John")
 `;
 
-function executeProgram(program: string): void {
-    program = Utils.removeComments(program);
-    program = Utils.removeEmptyLines(program);
+export function main() {
+    const scanner = new Scanner(input);
+    const tokens = scanner.scan();
 
-    let lines = Utils.splitWithFilter(program, /\n/);
-
-    let tokens: Token[] = [];
-    lines.forEach((line) => {
-        if (line.length < 1) return;
-        tokens = tokens.concat(tokenize(line));
-    });
-
-    for (const op of tokens) {
-        console.log(op);
+    for (const token of tokens) {
+        console.log('' + token);
     }
 }
 
-function tokenize(str: string): Token {
-    if (str.length < 1) {
-        throw new SyntaxError('Unexpected empty token');
-    }
-    str = str.trim();
-
-    return TokenUtils.tokenize(str);
-}
-
-executeProgram(input);
+main();

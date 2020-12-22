@@ -1,22 +1,17 @@
-import { SyntaxError } from './errors/syntax-error';
 import { TokenType } from './token-type';
 
-export namespace TokenUtils {
-    export function tokenize(str: string): Token {
-        for (const key in TokenType.types) {
-            const type = TokenType.types[key];
-            if (type.match(str)) {
-                return type.tokenize(str);
-            }
-        }
-        throw new SyntaxError(`Invalid Syntax: ${str}`);
-    }
-}
-
 export class Token {
-    name: string = '';
-    value: Token | number | string = '';
-    params: Token[] = [];
+    constructor(
+        public type: TokenType,
+        public literal: string,
+        public line: number
+    ) {}
 
-    constructor(public type: TokenType.TokenType) {}
+    toString(): string {
+        return `${this.type}: ${this.getEscapedLiteral()}`;
+    }
+
+    private getEscapedLiteral(): string {
+        return this.literal.replace('\n', '\\n');
+    }
 }
