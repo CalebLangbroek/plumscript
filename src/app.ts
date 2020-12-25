@@ -1,25 +1,21 @@
+import { Parser } from './parser';
 import { Scanner } from './scanner';
 
 const input = `
     # A simple program
-    var a = 4
-    var b = 5 + 3
+    bool a = 4
 
-    if(a < b) {
-        print("Less than")
-    } else {
-        print("Greater than or equal")
-    }
-    
-    print("John")
+    str b = "Hello World"
 `;
 
 export function main() {
     const scanner = new Scanner(input);
     const tokens = scanner.scan();
+    const parser = new Parser(tokens);
+    const ast = parser.parse();
 
-    for (const token of tokens) {
-        console.log('' + token);
+    for (const node of ast) {
+        console.log(node);
     }
 }
 

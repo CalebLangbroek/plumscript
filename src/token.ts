@@ -2,9 +2,9 @@ import { TokenType } from './token-type';
 
 export class Token {
     constructor(
-        public type: TokenType,
-        public literal: string,
-        public line: number
+        readonly type: TokenType,
+        readonly literal: string,
+        readonly line: number
     ) {}
 
     toString(): string {
