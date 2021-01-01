@@ -3,7 +3,7 @@ import { Scanner } from './scanner';
 
 const input = `
     # A simple program
-    bool a = 4
+    int a = 4 + 4
 
     str b = "Hello World"
 `;

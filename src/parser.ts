@@ -46,7 +46,9 @@ export class Parser {
             case TokenType.T_INTTYPE:
             case TokenType.T_STRINGTYPE:
             case TokenType.T_BOOLTYPE: {
-                return this.finishDeclaration(currentToken);
+                return this.parseDeclaration(currentToken);
+            }
+            case TokenType.T_FUN: {
             }
             default: {
                 throw new SyntaxError(currentToken.line, '');
@@ -54,30 +56,90 @@ export class Parser {
         }
     }
 
-    private finishDeclaration(typeSpecifier: Token): Declaration {
+    private parseDeclaration(typeSpecifier: Token): Declaration {
         const identifier = this.getNextToken();
 
         if (!this.checkTypes(identifier, TokenType.T_ID)) {
             throw new SyntaxError(identifier.line, SyntaxError.EXPECT_ID);
         }
 
-        this.ignoreTokens(TokenType.T_WHITESPACE);
-
         if (!this.checkTypes(this.getNextToken(), TokenType.T_ASSIGN)) {
             throw new SyntaxError(identifier.line, SyntaxError.EXPECT_ASSIGN);
         }
 
-        this.ignoreTokens(TokenType.T_WHITESPACE);
-
         return new Declaration(
             new TypeSpecifier(typeSpecifier),
             new Identifier(identifier),
-            this.finishExpression()
+            this.parseExpression(typeSpecifier)
         );
     }
 
-    private finishExpression(): Expression {
-        return new Literal(this.getNextToken());
+    private parseExpression(typeSpecifier: Token): Expression {
+        switch (typeSpecifier.type) {
+            case TokenType.T_INTTYPE: {
+                return this.parseArithmeticExpression();
+            }
+            case TokenType.T_STRINGTYPE: {
+                return this.parseArithmeticExpression();
+            }
+            default: {
+                // Should never reach here
+                throw new SyntaxError(typeSpecifier.line, '');
+            }
+        }
+    }
+
+    private parseArithmeticExpression(): Expression {
+        return this.parseAdditionExpression();
+    }
+
+    private parseAdditionExpression(): Expression {
+        const nextOperation = this.parseMultiplicationExpression.bind(this);
+        return this.parseBinaryExpression(nextOperation, [
+            TokenType.T_PLUS,
+            TokenType.T_MINUS,
+        ]);
+    }
+
+    private parseMultiplicationExpression(): Expression {
+        const nextOperation = this.parsePrimaryExpression.bind(this);
+        return this.parseBinaryExpression(nextOperation, [
+            TokenType.T_MULT,
+            TokenType.T_DIV,
+        ]);
+    }
+
+    private parsePrimaryExpression(): Expression {
+        const token = this.getNextToken();
+
+        switch (token.type) {
+            case TokenType.T_STRINGCONSTANT:
+            case TokenType.T_INTCONSTANT: {
+                return new Literal(token);
+            }
+            case TokenType.T_ID: {
+                return new Identifier(token);
+            }
+            default: {
+                throw new SyntaxError(token.line, '');
+            }
+        }
+    }
+
+    private parseBinaryExpression(
+        next: (...args: any[]) => Expression,
+        operators: TokenType[]
+    ): Expression {
+        const left = next();
+
+        for (const operator of operators) {
+            if (this.peekNextToken().type === operator) {
+                const right = next();
+                return new Binary(left, this.getNextToken(), right);
+            }
+        }
+
+        return left;
     }
 
     private checkTypes(token: Token, ...types: TokenType[]) {
