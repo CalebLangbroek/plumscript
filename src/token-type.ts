@@ -13,7 +13,7 @@ export class TokenType {
     static readonly T_STRINGTYPE: TokenType = new TokenType('T_STRINGTYPE', /^str\s/);
     
     static readonly T_INTCONSTANT: TokenType = new TokenType('T_INTCONSTANT', /^-?[0-9]+/);
-    static readonly T_STRINGCONSTANT: TokenType = new TokenType('T_STRINGCONSTANT', /^".*"/);
+    static readonly T_STRINGCONSTANT: TokenType = new TokenType('T_STRINGCONSTANT', /^"[^"]*"/);
 
     static readonly T_ID: TokenType = new TokenType('T_ID', /^[A-z]+/);
 
