@@ -5,7 +5,7 @@ const input = `
     # A simple program
     int a = 4 + 4
 
-    str b = "Hello World"
+    bool a = true || false
 `;
 
 export function main() {

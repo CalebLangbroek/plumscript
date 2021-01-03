@@ -113,85 +113,50 @@ export class Parser {
     }
 
     private parseMultiplicationExpression(): Expression {
-        const nextOperation = this.parsePrimaryArithmeticExpression.bind(this);
+        const nextOperation = this.parsePrimaryExpression.bind(
+            this,
+            TokenType.T_INTCONSTANT,
+            this.parseArithmeticExpression.bind(this)
+        );
         return this.parseBinaryExpression(nextOperation, [
             TokenType.T_MULT,
             TokenType.T_DIV,
         ]);
     }
 
-    private parsePrimaryArithmeticExpression(): Expression {
-        const token = this.getNextToken();
-
-        switch (token.type) {
-            case TokenType.T_INTCONSTANT: {
-                return new Literal(token);
-            }
-            case TokenType.T_ID: {
-                return new Identifier(token);
-            }
-            case TokenType.T_LPAREN: {
-                const expr = this.parseAdditionExpression();
-                this.expectToken(
-                    this.getNextToken(),
-                    SyntaxError.EXPECT_CLOSING_PAREN,
-                    TokenType.T_RPAREN
-                );
-                return expr;
-            }
-            default: {
-                throw new SyntaxError(token.line, SyntaxError.INVALID_EXPR);
-            }
-        }
-    }
-
     private parseStringExpression(): Expression {
-        const nextOperation = this.parsePrimaryStringExpression.bind(this);
+        const nextOperation = this.parsePrimaryExpression.bind(
+            this,
+            TokenType.T_STRINGCONSTANT,
+            this.parseStringExpression.bind(this)
+        );
         return this.parseBinaryExpression(nextOperation, [TokenType.T_PLUS]);
     }
 
-    private parsePrimaryStringExpression(): Expression {
-        const token = this.getNextToken();
-
-        switch (token.type) {
-            case TokenType.T_STRINGCONSTANT: {
-                return new Literal(token);
-            }
-            case TokenType.T_ID: {
-                return new Identifier(token);
-            }
-            case TokenType.T_LPAREN: {
-                const expr = this.parseStringExpression();
-                this.expectToken(
-                    this.getNextToken(),
-                    SyntaxError.EXPECT_CLOSING_PAREN,
-                    TokenType.T_RPAREN
-                );
-                return expr;
-            }
-            default: {
-                throw new SyntaxError(token.line, SyntaxError.INVALID_EXPR);
-            }
-        }
-    }
-
     private parseBooleanExpression(): Expression {
-        const nextOperation = this.parsePrimaryBooleanExpression.bind(this);
+        const nextOperation = this.parsePrimaryExpression.bind(
+            this,
+            TokenType.T_BOOLCONSTANT,
+            this.parseBooleanExpression.bind(this)
+        );
         return this.parseBinaryExpression(nextOperation, [TokenType.T_OR]);
     }
 
-    private parsePrimaryBooleanExpression(): Expression {
+    private parsePrimaryExpression(
+        literalType: TokenType,
+        parseFunction: () => Expression
+    ): Expression {
         const token = this.getNextToken();
 
         switch (token.type) {
-            case TokenType.T_BOOLTYPE: {
+            case literalType: {
                 return new Literal(token);
             }
             case TokenType.T_ID: {
                 return new Identifier(token);
             }
             case TokenType.T_LPAREN: {
-                const expr = this.parseBooleanExpression();
+                const expr = parseFunction();
                 this.expectToken(
                     this.getNextToken(),
                     SyntaxError.EXPECT_CLOSING_PAREN,

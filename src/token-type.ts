@@ -6,25 +6,24 @@ export class TokenType {
 
     static readonly T_COMMENT: TokenType = new TokenType('T_COMMENT', /^#.*/);
 
-    static readonly T_BOOLTYPE: TokenType = new TokenType('T_BOOLTYPE', /^bool\s/);
-    static readonly T_FUN: TokenType = new TokenType('T_FUN', /^fun\s/);
-    static readonly T_INTTYPE: TokenType = new TokenType('T_INTTYPE', /^int\s/);
-    static readonly T_RETURN: TokenType = new TokenType('T_RETURN', /^return\s/);
-    static readonly T_STRINGTYPE: TokenType = new TokenType('T_STRINGTYPE', /^str\s/);
+    static readonly T_BOOLTYPE: TokenType = new TokenType('T_BOOLTYPE', /^bool(?=\s)/);
+    static readonly T_FUN: TokenType = new TokenType('T_FUN', /^fun(?=\s)/);
+    static readonly T_INTTYPE: TokenType = new TokenType('T_INTTYPE', /^int(?=\s)/);
+    static readonly T_RETURN: TokenType = new TokenType('T_RETURN', /^return(?=\s)/);
+    static readonly T_STRINGTYPE: TokenType = new TokenType('T_STRINGTYPE', /^str(?=\s)/);
     
+    static readonly T_BOOLCONSTANT: TokenType = new TokenType('T_BOOLCONSTANT', /^(true|false)(?![A-z])/);
     static readonly T_INTCONSTANT: TokenType = new TokenType('T_INTCONSTANT', /^-?[0-9]+/);
     static readonly T_STRINGCONSTANT: TokenType = new TokenType('T_STRINGCONSTANT', /^"[^"]*"/);
 
+    static readonly T_ELSE: TokenType = new TokenType('T_ELSE', /^else(?![A-z])/);
+    static readonly T_FOR: TokenType = new TokenType('T_FOR', /^for(?![A-z])/);
+    static readonly T_IF: TokenType = new TokenType('T_IF', /^if(?![A-z])/);
+    static readonly T_NULL: TokenType = new TokenType('T_NULL', /^null(?![A-z])/);
+    static readonly T_WHILE: TokenType = new TokenType('T_WHILE', /^while(?![A-z])/);
+    
     static readonly T_ID: TokenType = new TokenType('T_ID', /^[A-z]+/);
 
-    static readonly T_ELSE: TokenType = new TokenType('T_ELSE', /^else/);
-    static readonly T_FALSE: TokenType = new TokenType('T_FALSE', /^false/);
-    static readonly T_FOR: TokenType = new TokenType('T_FOR', /^for/);
-    static readonly T_IF: TokenType = new TokenType('T_IF', /^if/);
-    static readonly T_NULL: TokenType = new TokenType('T_NULL', /^null/);
-    static readonly T_TRUE: TokenType = new TokenType('T_TRUE', /^true/);
-    static readonly T_WHILE: TokenType = new TokenType('T_WHILE', /^while/);
-    
     static readonly T_AND: TokenType = new TokenType('T_AND', /^&&/);
     static readonly T_ASSIGN: TokenType = new TokenType('T_ASSIGN', /^=/);
     static readonly T_COMMA: TokenType = new TokenType('T_COMMA', /^,/);
