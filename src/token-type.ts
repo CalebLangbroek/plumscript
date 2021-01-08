@@ -25,7 +25,7 @@ export class TokenType {
     static readonly T_ID: TokenType = new TokenType('T_ID', /^[A-z]+/);
 
     static readonly T_AND: TokenType = new TokenType('T_AND', /^&&/);
-    static readonly T_ASSIGN: TokenType = new TokenType('T_ASSIGN', /^=/);
+    static readonly T_ASSIGN: TokenType = new TokenType('T_ASSIGN', /^=(?!=)/);
     static readonly T_COMMA: TokenType = new TokenType('T_COMMA', /^,/);
     static readonly T_DIV: TokenType = new TokenType('T_DIV', /^\//);
     static readonly T_DOT: TokenType = new TokenType('T_DOT', /^\./);

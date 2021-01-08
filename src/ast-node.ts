@@ -39,7 +39,13 @@ export class Literal extends Expression {
 }
 
 export class Identifier extends Expression {
-    constructor(readonly token: Token) {
+    constructor(readonly id: Token) {
         super("N_IDENTIFIER");
+    }
+}
+
+export class FunctionCall extends Expression {
+    constructor(readonly id: Token, readonly params: Expression[]) {
+        super("N_FUNCTIONCALL");
     }
 }
