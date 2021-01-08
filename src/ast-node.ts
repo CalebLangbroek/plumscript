@@ -14,9 +14,21 @@ export class Declaration extends Statement {
     }
 }
 
+export class FunctionDeclaration extends Statement {
+    constructor(readonly id: Identifier, readonly params: Expression[], readonly body: Statement[]) {
+        super("N_FUNCTIONDECLARATION");
+    }
+}
+
 export class Assignment extends Statement {
-    constructor(readonly id: Identifier) {
-        super("N_VARIABLEDECLARATION");
+    constructor(readonly id: Identifier, readonly expr: Expression) {
+        super("N_ASSIGNMENT");
+    }
+}
+
+export class ReturnStatement extends Statement {
+    constructor(readonly expr?: Expression) {
+        super("N_RETURN");
     }
 }
 
@@ -45,7 +57,7 @@ export class Identifier extends Expression {
 }
 
 export class FunctionCall extends Expression {
-    constructor(readonly id: Token, readonly params: Expression[]) {
+    constructor(readonly id: Token, readonly args: Expression[]) {
         super("N_FUNCTIONCALL");
     }
 }

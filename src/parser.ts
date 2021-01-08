@@ -1,12 +1,16 @@
 import { Token } from './token';
 import {
+    Assignment,
     ASTNode,
     Binary,
     Declaration,
     Expression,
     FunctionCall,
+    FunctionDeclaration,
     Identifier,
     Literal,
+    ReturnStatement,
+    Statement,
     TypeSpecifier,
 } from './ast-node';
 import { TokenType } from './token-type';
@@ -50,11 +54,106 @@ export class Parser {
                 return this.parseDeclaration(currentToken);
             }
             case TokenType.T_FUN: {
+                return this.parseFunctionDeclaration();
+            }
+            case TokenType.T_ID: {
+                return this.parseAssignmentOrFunctionCall(currentToken);
+            }
+            case TokenType.T_RETURN: {
+                return this.parseReturn();
             }
             default: {
-                throw new SyntaxError(currentToken.line, '');
+                throw new SyntaxError(currentToken.line, SyntaxError.UNEX_CHAR);
             }
         }
+    }
+
+    private parseFunctionDeclaration(): FunctionDeclaration {
+        const identifier = this.getNextToken();
+
+        this.expectToken(identifier, SyntaxError.EXPECT_ID, TokenType.T_ID);
+
+        // Consume the L Paren
+        this.getNextToken();
+
+        const params: Identifier[] = [];
+
+        while (!this.checkTypes(this.peekNextToken(), TokenType.T_RPAREN)) {
+            const typeSpecifier = this.getNextToken();
+
+            this.expectToken(
+                typeSpecifier,
+                SyntaxError.EXPECT_TYPE,
+                TokenType.T_INTTYPE,
+                TokenType.T_STRINGTYPE,
+                TokenType.T_BOOLTYPE
+            );
+
+            const paramID = this.getNextToken();
+
+            this.expectToken(paramID, SyntaxError.EXPECT_ID, TokenType.T_ID);
+
+            // TODO: Add type checking for function parameters
+            params.push(new Identifier(paramID));
+
+            if (!this.checkTypes(this.peekNextToken(), TokenType.T_COMMA)) {
+                break;
+            } else {
+                // Consume the comma
+                this.getNextToken();
+            }
+        }
+
+        this.expectToken(
+            this.getNextToken(),
+            SyntaxError.EXPECT_CLOSING_PAREN,
+            TokenType.T_RPAREN
+        );
+
+        this.expectToken(
+            this.getNextToken(),
+            SyntaxError.EXPECT_CURLY_BRACKET,
+            TokenType.T_LCB
+        );
+
+        this.ignoreTokens(
+            TokenType.T_NEWLINE,
+            TokenType.T_WHITESPACE,
+            TokenType.T_COMMENT
+        );
+
+        const body: Statement[] = [];
+
+        while (!this.checkTypes(this.peekNextToken(), TokenType.T_RCB)) {
+            const statement = this.getNextNode();
+            if (statement) {
+                body.push(statement);
+            }
+
+            this.ignoreTokens(
+                TokenType.T_NEWLINE,
+                TokenType.T_WHITESPACE,
+                TokenType.T_COMMENT
+            );
+        }
+
+        this.expectToken(
+            this.getNextToken(),
+            SyntaxError.EXPECT_CURLY_BRACKET,
+            TokenType.T_RCB
+        );
+
+        return new FunctionDeclaration(
+            new Identifier(identifier),
+            params,
+            body
+        );
+    }
+
+    private parseReturn(): ReturnStatement {
+        return this.checkTypes(this.peekNextToken(), TokenType.T_NEWLINE)
+            ? new ReturnStatement()
+            : new ReturnStatement(this.parseExpression());
     }
 
     private parseDeclaration(typeSpecifier: Token): Declaration {
@@ -160,11 +259,42 @@ export class Parser {
         }
     }
 
-    private parseIdentifierOrFunctionCall(token: Token): Expression {
-        if (!this.checkTypes(this.peekNextToken(), TokenType.T_LPAREN)) {
-            return new Identifier(token);
+    private parseIdentifierOrFunctionCall(identifier: Token): Expression {
+        return this.checkTypes(this.peekNextToken(), TokenType.T_LPAREN)
+            ? this.parseFunctionCall(identifier)
+            : new Identifier(identifier);
+    }
+
+    private parseAssignmentOrFunctionCall(
+        identifier: Token
+    ): Expression | Statement {
+        if (this.checkTypes(this.peekNextToken(), TokenType.T_LPAREN)) {
+            return this.parseFunctionCall(identifier);
         }
 
+        this.expectToken(identifier, SyntaxError.EXPECT_ID, TokenType.T_ID);
+
+        this.expectToken(
+            this.getNextToken(),
+            SyntaxError.EXPECT_ASSIGN,
+            TokenType.T_ASSIGN
+        );
+
+        const assignment = new Assignment(
+            new Identifier(identifier),
+            this.parseExpression()
+        );
+
+        this.expectToken(
+            this.getNextToken(),
+            SyntaxError.EXPECT_NEWLINE,
+            TokenType.T_NEWLINE
+        );
+
+        return assignment;
+    }
+
+    private parseFunctionCall(identifier: Token): Expression {
         // Consume the L Paren
         this.getNextToken();
 
@@ -187,7 +317,7 @@ export class Parser {
             TokenType.T_RPAREN
         );
 
-        return new FunctionCall(token, args);
+        return new FunctionCall(identifier, args);
     }
 
     private parseBinaryExpression(
@@ -235,10 +365,6 @@ export class Parser {
 
     private getNextToken(): Token {
         return this.tokens[this.currentIndex++];
-    }
-
-    private getPreviousToken(): Token {
-        return this.tokens[this.currentIndex--];
     }
 
     private isAtEnd(): boolean {
