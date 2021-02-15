@@ -3,6 +3,7 @@ import {
     Assignment,
     ASTNode,
     Binary,
+    Conditional,
     Declaration,
     Expression,
     FunctionCall,
@@ -62,6 +63,9 @@ export class Parser {
             case TokenType.T_RETURN: {
                 return this.parseReturn();
             }
+            case TokenType.T_IF: {
+                return this.parseConditional();
+            }
             default: {
                 throw new SyntaxError(currentToken.line, SyntaxError.UNEX_CHAR);
             }
@@ -110,43 +114,10 @@ export class Parser {
             TokenType.T_RPAREN
         );
 
-        this.expectToken(
-            this.getNextToken(),
-            SyntaxError.EXPECT_CURLY_BRACKET,
-            TokenType.T_LCB
-        );
-
-        this.ignoreTokens(
-            TokenType.T_NEWLINE,
-            TokenType.T_WHITESPACE,
-            TokenType.T_COMMENT
-        );
-
-        const body: Statement[] = [];
-
-        while (!this.checkTypes(this.peekNextToken(), TokenType.T_RCB)) {
-            const statement = this.getNextNode();
-            if (statement) {
-                body.push(statement);
-            }
-
-            this.ignoreTokens(
-                TokenType.T_NEWLINE,
-                TokenType.T_WHITESPACE,
-                TokenType.T_COMMENT
-            );
-        }
-
-        this.expectToken(
-            this.getNextToken(),
-            SyntaxError.EXPECT_CURLY_BRACKET,
-            TokenType.T_RCB
-        );
-
         return new FunctionDeclaration(
             new Identifier(identifier),
             params,
-            body
+            this.parseBlockStatement()
         );
     }
 
@@ -180,6 +151,72 @@ export class Parser {
         );
 
         return declaration;
+    }
+
+    private parseConditional(): Conditional {
+        const condition = this.parseExpression();
+
+        const block = this.parseBlockStatement();
+
+        if (this.checkTypes(this.peekNextToken(), TokenType.T_ELSE)) {
+            // Consume Else token
+            this.getNextToken();
+
+            let next: Conditional | Statement[];
+
+            if (this.checkTypes(this.peekNextToken(), TokenType.T_IF)) {
+                // Consume If token
+                this.getNextToken();
+                next = this.parseConditional();
+            } else {
+                next = this.parseBlockStatement();
+            }
+
+            return new Conditional(condition, block, next);
+        }
+
+        return new Conditional(condition, block);
+    }
+
+    private parseBlockStatement(): Statement[] {
+        this.expectToken(
+            this.getNextToken(),
+            SyntaxError.EXPECT_OPENING_BRACE,
+            TokenType.T_LCB
+        );
+
+        this.ignoreTokens(
+            TokenType.T_NEWLINE,
+            TokenType.T_WHITESPACE,
+            TokenType.T_COMMENT
+        );
+
+        const statements: Statement[] = [];
+
+        while (
+            !this.isAtEnd() &&
+            !this.checkTypes(this.peekNextToken(), TokenType.T_RCB)
+        ) {
+            const statement = this.getNextNode();
+            if (statement) {
+                statements.push(statement);
+            }
+
+            this.ignoreTokens(
+                TokenType.T_NEWLINE,
+                TokenType.T_WHITESPACE,
+                TokenType.T_COMMENT
+            );
+        }
+
+        this.expectToken(
+            this.getNextToken(),
+            SyntaxError.EXPECT_CLOSING_BRACE,
+            TokenType.T_RCB
+        );
+
+        // TODO consider making a block AST Node class
+        return statements;
     }
 
     private parseExpression(): Expression {
@@ -354,6 +391,13 @@ export class Parser {
     }
 
     private expectToken(token: Token, errMsg: string, ...types: TokenType[]) {
+        if (this.isAtEnd() || !token) {
+            throw new SyntaxError(
+                this.tokens[this.tokens.length - 1].line,
+                SyntaxError.UNEX_EOF
+            );
+        }
+
         if (!this.checkTypes(token, ...types)) {
             throw new SyntaxError(token.line, errMsg);
         }
@@ -368,6 +412,6 @@ export class Parser {
     }
 
     private isAtEnd(): boolean {
-        return this.currentIndex == this.tokens.length;
+        return this.currentIndex >= this.tokens.length;
     }
 }

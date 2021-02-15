@@ -15,7 +15,7 @@ export class Declaration extends Statement {
 }
 
 export class FunctionDeclaration extends Statement {
-    constructor(readonly id: Identifier, readonly params: Expression[], readonly body: Statement[]) {
+    constructor(readonly id: Identifier, readonly params: Expression[], readonly block: Statement[]) {
         super("N_FUNCTIONDECLARATION");
     }
 }
@@ -29,6 +29,12 @@ export class Assignment extends Statement {
 export class ReturnStatement extends Statement {
     constructor(readonly expr?: Expression) {
         super("N_RETURN");
+    }
+}
+
+export class Conditional extends Statement {
+    constructor(readonly condition: Expression, readonly block: Statement[], readonly next? : Conditional | Statement[]) {
+        super("N_CONDITIONAL");
     }
 }
 
