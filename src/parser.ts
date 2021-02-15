@@ -13,6 +13,7 @@ import {
     ReturnStatement,
     Statement,
     TypeSpecifier,
+    WhileStatement,
 } from './ast-node';
 import { TokenType } from './token-type';
 import { SyntaxError } from './errors/syntax-error';
@@ -65,6 +66,9 @@ export class Parser {
             }
             case TokenType.T_IF: {
                 return this.parseConditional();
+            }
+            case TokenType.T_WHILE: {
+                return this.parseWhile();
             }
             default: {
                 throw new SyntaxError(currentToken.line, SyntaxError.UNEX_CHAR);
@@ -176,6 +180,13 @@ export class Parser {
         }
 
         return new Conditional(condition, block);
+    }
+
+    private parseWhile(): WhileStatement {
+        return new WhileStatement(
+            this.parseExpression(),
+            this.parseBlockStatement()
+        );
     }
 
     private parseBlockStatement(): Statement[] {

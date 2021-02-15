@@ -38,6 +38,12 @@ export class Conditional extends Statement {
     }
 }
 
+export class WhileStatement extends Statement {
+    constructor(readonly condition: Expression, readonly block: Statement[]) {
+        super("N_WHILE");
+    }
+}
+
 export class Binary extends Expression {
     constructor(readonly left: Expression, readonly operator: Token, readonly right: Expression) {
         super("N_BINARY");
