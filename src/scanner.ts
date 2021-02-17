@@ -24,7 +24,7 @@ export class Scanner {
             const match = type.match(str);
             if (match) {
                 this.currentIndex += match[0].length;
-                token = new Token(type, match[0], this.line);
+                token = new Token(type, match[0].replaceAll("\"", ""), this.line);
                 break;
             }
         }

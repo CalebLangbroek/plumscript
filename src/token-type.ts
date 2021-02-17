@@ -14,7 +14,7 @@ export class TokenType {
     
     static readonly T_BOOLCONSTANT: TokenType = new TokenType('T_BOOLCONSTANT', /^(true|false)(?![A-z])/);
     static readonly T_INTCONSTANT: TokenType = new TokenType('T_INTCONSTANT', /^-?[0-9]+/);
-    static readonly T_STRINGCONSTANT: TokenType = new TokenType('T_STRINGCONSTANT', /^"[^"]*"/);
+    static readonly T_STRINGCONSTANT: TokenType = new TokenType('T_STRINGCONSTANT', /^"[^"]*?"/);
 
     static readonly T_ELSE: TokenType = new TokenType('T_ELSE', /^else(?![A-z])/);
     static readonly T_FOR: TokenType = new TokenType('T_FOR', /^for(?![A-z])/);
@@ -46,7 +46,7 @@ export class TokenType {
     static readonly T_RCB: TokenType = new TokenType('T_RCB', /^\}/);
     static readonly T_RPAREN: TokenType = new TokenType('T_RPAREN', /^\)/);
 
-    constructor(public name: string, private regex: RegExp) {
+    constructor(readonly name: string, private regex: RegExp) {
         TokenType.TYPES.push(this);
     }
 

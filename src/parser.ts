@@ -4,7 +4,7 @@ import {
     ASTNode,
     Binary,
     Conditional,
-    Declaration,
+    VariableDeclaration,
     Expression,
     FunctionCall,
     FunctionDeclaration,
@@ -131,7 +131,7 @@ export class Parser {
             : new ReturnStatement(this.parseExpression());
     }
 
-    private parseDeclaration(typeSpecifier: Token): Declaration {
+    private parseDeclaration(typeSpecifier: Token): VariableDeclaration {
         const identifier = this.getNextToken();
 
         this.expectToken(identifier, SyntaxError.EXPECT_ID, TokenType.T_ID);
@@ -142,7 +142,7 @@ export class Parser {
             TokenType.T_ASSIGN
         );
 
-        const declaration = new Declaration(
+        const declaration = new VariableDeclaration(
             new TypeSpecifier(typeSpecifier),
             new Identifier(identifier),
             this.parseExpression()
@@ -365,7 +365,7 @@ export class Parser {
             TokenType.T_RPAREN
         );
 
-        return new FunctionCall(identifier, args);
+        return new FunctionCall(new Identifier(identifier), args);
     }
 
     private parseBinaryExpression(
