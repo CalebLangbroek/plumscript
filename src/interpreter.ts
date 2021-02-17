@@ -114,7 +114,10 @@ export class Interpreter {
     }
 
     interpretFunctionDeclaration(declaration: FunctionDeclaration): void {
-        if (this.memory.hasFunction(declaration.id)) {
+        if (
+            this.memory.hasFunction(declaration.id) ||
+            NativeFunction.hasNativeFunction(declaration.id)
+        ) {
             throw new RuntimeError(
                 declaration.id.id.line,
                 RuntimeError.DEC_FUN
@@ -128,19 +131,35 @@ export class Interpreter {
         const condition = this.interpretExpression(conditional.condition);
 
         if (this.convertToBoolean(condition)) {
+            this.memory.addScope();
             conditional.block.forEach((statement) =>
                 this.interpretStatement(statement)
             );
+            this.memory.removeScope();
         } else if (conditional.next instanceof Conditional) {
             this.interpretConditional(conditional.next);
         } else if (conditional.next instanceof Array) {
+            this.memory.addScope();
             conditional.next.forEach((statement) =>
                 this.interpretStatement(statement)
             );
+            this.memory.removeScope();
         }
     }
 
-    interpretWhile(whileStatement: WhileStatement): void {}
+    interpretWhile(whileStatement: WhileStatement): void {
+        while (
+            this.convertToBoolean(
+                this.interpretExpression(whileStatement.condition)
+            )
+        ) {
+            this.memory.addScope();
+            whileStatement.block.forEach((statement) =>
+                this.interpretStatement(statement)
+            );
+            this.memory.removeScope();
+        }
+    }
 
     interpretExpression(expression: ASTNode): Literal {
         switch (expression.type) {
@@ -172,14 +191,11 @@ export class Interpreter {
     }
 
     interpretFunctionCall(functionCall: FunctionCall): Literal | undefined {
-        const nativeFunction = NativeFunction.FUNCTIONS.find(
-            (natFun) => natFun.name === functionCall.id.id.literal
-        );
-
-        if (nativeFunction) {
-            nativeFunction.execute(functionCall.args.map(arg => this.interpretExpression(arg).token.literal));
-            return undefined;
+        // handle built-in functions
+        if (NativeFunction.hasNativeFunction(functionCall.id)) {
+            return this.interpretNativeFunctionCall(functionCall);
         }
+
         const functionDeclaration = this.memory.getFunction(functionCall.id);
 
         if (functionDeclaration.params.length !== functionCall.args.length) {
@@ -225,6 +241,36 @@ export class Interpreter {
         return returnLiteral;
     }
 
+    interpretNativeFunctionCall(
+        functionCall: FunctionCall
+    ): Literal | undefined {
+        const nativeFunction = NativeFunction.getNativeFunction(
+            functionCall.id
+        );
+
+        const returnValue = nativeFunction.execute(
+            functionCall.args.map(
+                (arg) => this.interpretExpression(arg).token.literal
+            )
+        );
+
+        if (returnValue) {
+            let type = undefined;
+            if (returnValue instanceof Number) {
+                type = TokenType.T_INTCONSTANT;
+            } else if (returnValue instanceof Boolean) {
+                type = TokenType.T_BOOLCONSTANT;
+            } else {
+                type = TokenType.T_STRINGCONSTANT;
+            }
+            return new Literal(
+                new Token(type, returnValue.toString(), functionCall.id.id.line)
+            );
+        }
+
+        return undefined;
+    }
+
     interpretBinaryExpression(binaryExpression: Binary): Literal {
         const left = this.interpretExpression(binaryExpression.left);
         const right = this.interpretExpression(binaryExpression.right);
@@ -232,6 +278,7 @@ export class Interpreter {
         let type = undefined;
         let literal = '';
 
+        // TODO add variable type checking
         switch (binaryExpression.operator.type) {
             case TokenType.T_OR: {
                 type = TokenType.T_BOOLCONSTANT;
@@ -290,7 +337,10 @@ export class Interpreter {
                 break;
             }
             case TokenType.T_PLUS: {
-                if (left.token.type === TokenType.T_STRINGCONSTANT) {
+                if (
+                    left.token.type === TokenType.T_STRINGCONSTANT ||
+                    right.token.type === TokenType.T_STRINGCONSTANT
+                ) {
                     type = TokenType.T_STRINGCONSTANT;
                     literal = left.token.literal + right.token.literal;
                 } else {

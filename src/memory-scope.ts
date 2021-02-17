@@ -34,7 +34,16 @@ export class MemoryScope {
         throw new RuntimeError(id.id.line, RuntimeError.UNDEC_VAR);
     }
 
-    setVariable(id: Identifier, value: Literal) {
+    setVariable(id: Identifier, value: Literal): void {
+        // Check if variable already exists
+        for (const scope of this.variableScopes) {
+            if (scope.has(id.id.literal)) {
+                scope.set(id.id.literal, value);
+                return;
+            }
+        }
+
+        // Otherwise declare new in current scope
         this.getCurrentVariableScope().set(id.id.literal, value);
     }
 
@@ -60,16 +69,25 @@ export class MemoryScope {
         throw new RuntimeError(id.id.line, RuntimeError.UNDEC_FUN);
     }
 
-    setFunction(id: Identifier, value: FunctionDeclaration) {
+    setFunction(id: Identifier, value: FunctionDeclaration): void {
+        // Check if function already exists
+        for (const scope of this.functionScopes) {
+            if (scope.has(id.id.literal)) {
+                scope.set(id.id.literal, value);
+                return;
+            }
+        }
+
+        // Otherwise declare new in current scope
         this.getCurrentFunctionScope().set(id.id.literal, value);
     }
 
-    addScope() {
+    addScope(): void {
         this.variableScopes.push(new Map<string, Literal>());
         this.functionScopes.push(new Map<string, FunctionDeclaration>());
     }
 
-    removeScope() {
+    removeScope(): void {
         if (this.variableScopes.length !== 0) {
             this.variableScopes.pop();
         }
