@@ -3,7 +3,6 @@ import {
     ASTNode,
     Binary,
     Conditional,
-    Expression,
     FunctionCall,
     FunctionDeclaration,
     Identifier,
@@ -33,7 +32,7 @@ export class Interpreter {
         }
     }
 
-    interpretStatement(statement: ASTNode): void {
+    interpretStatement(statement: ASTNode): Literal | undefined {
         switch (statement.type) {
             case ASTNodeType.N_VARIABLEDECLARATION: {
                 this.interpretVariableDeclaration(
@@ -52,18 +51,15 @@ export class Interpreter {
                 break;
             }
             case ASTNodeType.N_CONDITIONAL: {
-                this.interpretConditional(statement as Conditional);
-                break;
+                return this.interpretConditional(statement as Conditional);
             }
             case ASTNodeType.N_WHILE: {
-                this.interpretWhile(statement as WhileStatement);
-                break;
+                return this.interpretWhile(statement as WhileStatement);
             }
             case ASTNodeType.N_FUNCTIONCALL: {
                 // All though technically not a statement, treat function call like one
                 // Can be treated as expression or statement
-                this.interpretFunctionCall(statement as FunctionCall);
-                break;
+                return this.interpretFunctionCall(statement as FunctionCall);
             }
             default: {
                 throw new RuntimeError(-1, RuntimeError.INVALID_STMT);
@@ -127,38 +123,63 @@ export class Interpreter {
         this.memory.setFunction(declaration.id, declaration);
     }
 
-    interpretConditional(conditional: Conditional): void {
+    interpretConditional(conditional: Conditional): Literal | undefined {
         const condition = this.interpretExpression(conditional.condition);
-
+        let value = undefined;
         if (this.convertToBoolean(condition)) {
-            this.memory.addScope();
-            conditional.block.forEach((statement) =>
-                this.interpretStatement(statement)
-            );
-            this.memory.removeScope();
+            value = this.interpretBlock(conditional.block);
         } else if (conditional.next instanceof Conditional) {
-            this.interpretConditional(conditional.next);
+            value = this.interpretConditional(conditional.next);
         } else if (conditional.next instanceof Array) {
-            this.memory.addScope();
-            conditional.next.forEach((statement) =>
-                this.interpretStatement(statement)
-            );
-            this.memory.removeScope();
+            value = this.interpretBlock(conditional.next);
         }
+        return value;
     }
 
-    interpretWhile(whileStatement: WhileStatement): void {
+    interpretWhile(whileStatement: WhileStatement): Literal | undefined {
         while (
             this.convertToBoolean(
                 this.interpretExpression(whileStatement.condition)
             )
         ) {
-            this.memory.addScope();
-            whileStatement.block.forEach((statement) =>
-                this.interpretStatement(statement)
-            );
-            this.memory.removeScope();
+            const value = this.interpretBlock(whileStatement.block);
+
+            if (value) {
+                return value;
+            }
         }
+    }
+
+    interpretBlock(
+        block: Statement[],
+        params?: Map<Identifier, Literal>
+    ): Literal | undefined {
+        this.memory.addScope();
+        if (params) {
+            params.forEach((val: Literal, id: Identifier) =>
+                this.memory.setInCurrentScope(id, val)
+            );
+        }
+        let returnValue = undefined;
+        for (const statement of block) {
+            if (statement.type === ASTNodeType.N_RETURN) {
+                const returnStatement = statement as ReturnStatement;
+                if (returnStatement.expr) {
+                    returnValue = this.interpretExpression(
+                        returnStatement.expr
+                    );
+                }
+            } else {
+                returnValue = this.interpretStatement(statement);
+            }
+
+            if (returnValue) {
+                break;
+            }
+        }
+        this.memory.removeScope();
+
+        return returnValue;
     }
 
     interpretExpression(expression: ASTNode): Literal {
@@ -217,28 +238,7 @@ export class Interpreter {
             );
         }
 
-        this.memory.addScope();
-
-        paramsMap.forEach((val: Literal, id: Identifier) =>
-            this.memory.setVariable(id, val)
-        );
-
-        let returnLiteral = undefined;
-
-        for (const statement of functionDeclaration.block) {
-            if (statement.type === ASTNodeType.N_RETURN) {
-                const retStatement = <ReturnStatement>statement;
-                if (retStatement.expr) {
-                    returnLiteral = this.interpretExpression(retStatement.expr);
-                }
-                break;
-            }
-            this.interpretStatement(statement);
-        }
-
-        this.memory.removeScope();
-
-        return returnLiteral;
+        return this.interpretBlock(functionDeclaration.block, paramsMap);
     }
 
     interpretNativeFunctionCall(

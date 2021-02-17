@@ -3,7 +3,7 @@ import { Token } from './token';
 import { TokenType } from './token-type';
 
 export class Scanner {
-    private line: number = 0;
+    private line: number = 1;
     private tokens: Token[] = [];
     private currentIndex: number = 0;
 

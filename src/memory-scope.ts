@@ -13,7 +13,8 @@ export class MemoryScope {
     }
 
     hasVariable(id: Identifier): boolean {
-        for (const scope of this.variableScopes) {
+        for (let i = this.variableScopes.length - 1; i > -1; i--) {
+            const scope = this.variableScopes[i];
             if (scope.has(id.id.literal)) {
                 return true;
             }
@@ -23,7 +24,8 @@ export class MemoryScope {
     }
 
     getVariable(id: Identifier): Literal {
-        for (const scope of this.variableScopes) {
+        for (let i = this.variableScopes.length - 1; i > -1; i--) {
+            const scope = this.variableScopes[i];
             if (scope.has(id.id.literal)) {
                 // Casting here bc scope.get() returns undefined if key doesn't exist
                 // but we already check that the id exists so it is always a Literal
@@ -36,7 +38,8 @@ export class MemoryScope {
 
     setVariable(id: Identifier, value: Literal): void {
         // Check if variable already exists
-        for (const scope of this.variableScopes) {
+        for (let i = this.variableScopes.length - 1; i > -1; i--) {
+            const scope = this.variableScopes[i];
             if (scope.has(id.id.literal)) {
                 scope.set(id.id.literal, value);
                 return;
@@ -47,8 +50,13 @@ export class MemoryScope {
         this.getCurrentVariableScope().set(id.id.literal, value);
     }
 
+    setInCurrentScope(id: Identifier, value: Literal) {
+        this.getCurrentVariableScope().set(id.id.literal, value);
+    }
+
     hasFunction(id: Identifier): boolean {
-        for (const scope of this.functionScopes) {
+        for (let i = this.functionScopes.length - 1; i > -1; i--) {
+            const scope = this.functionScopes[i];
             if (scope.has(id.id.literal)) {
                 return true;
             }
@@ -58,7 +66,8 @@ export class MemoryScope {
     }
 
     getFunction(id: Identifier): FunctionDeclaration {
-        for (const scope of this.functionScopes) {
+        for (let i = this.functionScopes.length - 1; i > -1; i--) {
+            const scope = this.functionScopes[i];
             if (scope.has(id.id.literal)) {
                 // Casting here bc scope.get() returns undefined if key doesn't exist
                 // but we already check that the id exists so it is always a Literal

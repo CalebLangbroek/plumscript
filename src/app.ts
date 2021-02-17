@@ -1,22 +1,29 @@
+import { readFileSync } from 'fs';
+import { Interpreter } from './interpreter';
 import { Parser } from './parser';
 import { Scanner } from './scanner';
 
-const input = `
-    # A simple program
-    int a = 4 + 4
+export class PlumScript {
+    constructor(private source: string) {}
 
-    bool a = true || false
-`;
-
-export function main() {
-    const scanner = new Scanner(input);
-    const tokens = scanner.scan();
-    const parser = new Parser(tokens);
-    const ast = parser.parse();
-
-    for (const node of ast) {
-        console.log(node);
+    run() {
+        try {
+            const scanner = new Scanner(this.source);
+            const tokens = scanner.scan();
+            const parser = new Parser(tokens);
+            const ast = parser.parse();
+            const interpreter = new Interpreter(ast);
+            interpreter.interpret();
+        } catch (e) {
+            console.log(<Error>e.message);
+        }
     }
 }
 
-main();
+function main(args: string[]) {
+    const source = readFileSync(args[0]);
+    const plum = new PlumScript(source.toString());
+    plum.run();
+}
+
+main(process.argv.slice(2));
