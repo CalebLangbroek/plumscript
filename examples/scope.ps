@@ -1,0 +1,20 @@
+fun multiply(int a, int b) {
+    fun add(int a, int b) {
+        return a + b
+    }
+    int i = 0
+    int sum = 0
+
+    while i < b {
+        sum = sum + a
+        i = i + 1
+    }
+
+    return sum
+}
+
+# Prints 25
+print(multiply(5, 5))
+
+# Throws undeclared function error because the add function isn't in scope
+print(add(2, 3))
