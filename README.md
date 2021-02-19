@@ -1,7 +1,7 @@
-<h1 style="text-align: center">
+<h1 align=center>
   <img src="./images/plumscript.svg" width="500px" alt="plumscript logo" /><br />
 </h1>
-<p style="text-align: center">PlumScript is a small, interpreted programming language made with TypeScript.</p>
+<p align=center>PlumScript is a small, interpreted programming language made with TypeScript.</p>
 
 ## About
 [Try it out here.](https://ps.caleblangbroek.com)
