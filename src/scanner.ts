@@ -24,7 +24,11 @@ export class Scanner {
             const match = type.match(str);
             if (match) {
                 this.currentIndex += match[0].length;
-                token = new Token(type, match[0].replaceAll("\"", ""), this.line);
+                token = new Token(
+                    type,
+                    this.replaceAll(match[0], '"', ''),
+                    this.line
+                );
                 break;
             }
         }
@@ -42,5 +46,20 @@ export class Scanner {
         } else if (token.type !== TokenType.T_WHITESPACE) {
             this.tokens.push(token);
         }
+    }
+
+    private replaceAll(
+        source: string,
+        search: string,
+        replace: string
+    ): string {
+        let index = source.indexOf(search);
+
+        while (index !== -1) {
+            source = source.replace(search, replace);
+            index = source.indexOf(search, index + replace.length);
+        }
+
+        return source;
     }
 }
