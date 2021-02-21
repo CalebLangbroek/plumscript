@@ -6,3 +6,6 @@
 
 # IDE - VSCode
 .vscode/
+
+# Tests
+coverage/
