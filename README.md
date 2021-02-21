@@ -4,7 +4,7 @@
 <p align=center>PlumScript is a small, interpreted programming language made with TypeScript.</p>
 
 ## About
-[Try it out here.](https://ps.caleblangbroek.com)
+[Try it out here.](https://plum.caleblangbroek.com)
 
 ```
 fun add(int a, int b) {
@@ -48,3 +48,6 @@ To test the project run the following command.
 ```
 npm test
 ```
+
+## License
+Distributed under the MIT License.
