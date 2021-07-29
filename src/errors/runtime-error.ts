@@ -8,6 +8,7 @@ export class RuntimeError extends Error {
     static readonly INVALID_EXPR = "INVALID EXPRESSION";
     static readonly INVALID_ARGS = "INVALID NUMBER OF ARGS";
     static readonly INVALID_STMT = "INVALID STATEMENT";
+    static readonly INVALID_RTN_TYPE = "INVALID RETURN TYPE";
     static readonly INVALID_VAR_TYPE = "INVALID VARIABLE TYPE";
     static readonly UNDEC_FUN = "UNDECLARED FUNCTION";
     static readonly UNDEC_VAR = "UNDECLARED VARIABLE";

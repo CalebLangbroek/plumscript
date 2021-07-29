@@ -16,6 +16,7 @@ import { ASTNodeType } from './ast-node-type';
 import { RuntimeError } from './errors/runtime-error';
 import { MemoryScope } from './memory-scope';
 import { NativeFunction } from './native-function';
+import { NativeType } from './native-type';
 import { Token } from './token';
 import { TokenType } from './token-type';
 
@@ -248,27 +249,22 @@ export class Interpreter {
             functionCall.id
         );
 
+        // TODO add type and count checking for native functions
         const returnValue = nativeFunction.execute(
             functionCall.args.map(
                 (arg) => this.interpretExpression(arg).token.literal
-            )
+            ) 
         );
-
-        if (returnValue) {
-            let type = undefined;
-            if (returnValue instanceof Number) {
-                type = TokenType.T_INTCONSTANT;
-            } else if (returnValue instanceof Boolean) {
-                type = TokenType.T_BOOLCONSTANT;
-            } else {
-                type = TokenType.T_STRINGCONSTANT;
+        
+        for(const nativeType of NativeType.TYPES) {
+            if(nativeType.matches(returnValue)) {
+                return new Literal(
+                    new Token(nativeType.type, returnValue?.toString(), functionCall.id.id.line)
+                );
             }
-            return new Literal(
-                new Token(type, returnValue.toString(), functionCall.id.id.line)
-            );
         }
 
-        return undefined;
+        throw new RuntimeError(functionCall.id.id.line, RuntimeError.INVALID_RTN_TYPE);
     }
 
     interpretBinaryExpression(binaryExpression: Binary): Literal {
