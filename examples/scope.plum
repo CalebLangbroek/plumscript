@@ -2,11 +2,12 @@ fun multiply(int a, int b) {
     fun add(int a, int b) {
         return a + b
     }
+    
     int i = 0
     int sum = 0
 
     while i < b {
-        sum = sum + a
+        sum = add(sum, a)
         i = i + 1
     }
 

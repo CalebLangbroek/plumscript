@@ -5,7 +5,8 @@
     "main": "dist/app.js",
     "types": "dist/app.d.ts",
     "scripts": {
-        "start": "npx nodemon dist/app.js ./examples/test.plum",
+        "start": "npx nodemon -e js,plum dist/app.js ./examples/test.plum",
+        "watch": "npx tsc -w",
         "clean": "rm -r dist",
         "test": "jest",
         "coverage": "jest --coverage"

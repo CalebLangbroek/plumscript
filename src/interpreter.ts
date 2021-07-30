@@ -253,7 +253,7 @@ export class Interpreter {
         const returnValue = nativeFunction.execute(
             functionCall.args.map(
                 (arg) => this.interpretExpression(arg).token.literal
-            ) 
+            )
         );
         
         for(const nativeType of NativeType.TYPES) {
